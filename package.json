@@ -1,0 +1,6 @@
+{
+  "name": "acm-recruiting", "version": "1.0.0", "private": true,
+  "description": "Atlantic Coast Mortgage recruiting landing page",
+  "scripts": { "dev": "node scripts/serve.mjs", "build": "node scripts/build.mjs", "check": "node scripts/check.mjs", "start": "node scripts/serve.mjs" },
+  "engines": { "node": ">=20" }
+}

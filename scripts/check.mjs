@@ -1,0 +1,12 @@
+import {readFile,stat} from 'node:fs/promises';
+import assert from 'node:assert/strict';
+const html=await readFile('public/index.html','utf8');const css=await readFile('public/styles.css','utf8');
+const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);
+assert.equal(new Set(ids).size,ids.length,'Duplicate HTML ids');
+for(const m of html.matchAll(/href="#([^"]+)"/g))assert(ids.includes(m[1]),`Missing anchor ${m[1]}`);
+for(const m of html.matchAll(/(?:src|href)="\.\/([^"?]+)"/g))assert((await stat('public/'+m[1])).size>0,`Missing or empty asset ${m[1]}`);
+for(const m of html.matchAll(/data-video="([^"]+)"/g))assert((await stat('public/assets/'+m[1])).size>1000,`Missing video ${m[1]}`);
+for(const m of css.matchAll(/url\('\.\/([^']+)'\)/g))assert((await stat('public/'+m[1])).size>0,`Missing CSS asset ${m[1]}`);
+assert(html.includes('sms:+15712772120'));assert(html.includes('tel:+15712772120'));assert(html.includes('mailto:hmitchell@acmllc.com'));
+assert.equal((html.match(/<h1>/g)||[]).length,1);
+console.log('Passed: unique ids, anchor targets, local assets, fonts, video files, direct contact links, and primary heading.');
