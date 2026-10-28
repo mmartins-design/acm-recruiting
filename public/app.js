@@ -100,3 +100,23 @@ function configureAdvantageMotion(){
 }
 configureAdvantageMotion();
 motionPreference.addEventListener('change',configureAdvantageMotion);
+
+// Section 3 workflow panel enters from the right once it scrolls into view.
+const workflowPanel=document.querySelector('#platform .workflow');
+let workflowObserver;
+function configureWorkflowMotion(){
+ workflowObserver?.disconnect();
+ if(!workflowPanel)return;
+ workflowPanel.classList.remove('workflow-reveal','workflow-reveal-pending','workflow-reveal-visible');
+ if(motionPreference.matches||!('IntersectionObserver' in window))return;
+ workflowPanel.classList.add('workflow-reveal','workflow-reveal-pending');
+ workflowObserver=new IntersectionObserver(entries=>{
+  if(!entries.some(entry=>entry.isIntersecting))return;
+  workflowPanel.classList.remove('workflow-reveal-pending');
+  workflowPanel.classList.add('workflow-reveal-visible');
+  workflowObserver.disconnect();
+ },{threshold:.15,rootMargin:'0px 0px -24px 0px'});
+ workflowObserver.observe(workflowPanel);
+}
+configureWorkflowMotion();
+motionPreference.addEventListener('change',configureWorkflowMotion);
