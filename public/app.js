@@ -76,3 +76,27 @@ if(heroVisual&&heroFloats.length){
  addEventListener('resize',queueHeroParallax,{passive:true});
  motionPreference.addEventListener('change',configureHeroMotion);
 }
+
+// Advantage cards reveal once; mobile cards enter individually without a stagger.
+const advantageCards=[...document.querySelectorAll('.advantage-card')];
+let advantageObserver;
+function configureAdvantageMotion(){
+ advantageObserver?.disconnect();
+ advantageCards.forEach(card=>card.classList.remove('card-reveal','card-reveal-pending','card-reveal-visible'));
+ if(motionPreference.matches||!('IntersectionObserver' in window))return;
+ advantageObserver=new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+   if(!entry.isIntersecting)return;
+   entry.target.classList.remove('card-reveal-pending');
+   entry.target.classList.add('card-reveal-visible');
+   advantageObserver.unobserve(entry.target);
+  });
+ },{threshold:.15,rootMargin:'0px 0px -24px 0px'});
+ advantageCards.forEach((card,index)=>{
+  card.style.setProperty('--card-delay',index*100+'ms');
+  card.classList.add('card-reveal','card-reveal-pending');
+  advantageObserver.observe(card);
+ });
+}
+configureAdvantageMotion();
+motionPreference.addEventListener('change',configureAdvantageMotion);
