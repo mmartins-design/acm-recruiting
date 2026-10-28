@@ -49,3 +49,10 @@
 #support .support-reveal-pending{opacity:0;transform:translateX(var(--support-entry-x))}
 #support .support-reveal-visible{opacity:1;transform:translateX(0)}
 @media(prefers-reduced-motion:reduce){#support .support-reveal{opacity:1!important;transform:none!important;transition:none!important}}
+
+/* Remaining sections share the same scroll-entrance timing. */
+#stories,#models,#growth,#transition,#connect{overflow-x:clip}
+.scroll-reveal{transition:opacity .8s ease,transform .8s cubic-bezier(.22,1,.36,1);transition-delay:var(--reveal-delay,0ms)}
+.scroll-reveal.scroll-reveal-pending{opacity:0;transform:translate(var(--reveal-x,0px),var(--reveal-y,0px))}
+.scroll-reveal.scroll-reveal-visible{opacity:1;transform:translate(0,0)}
+@media(prefers-reduced-motion:reduce){.scroll-reveal{opacity:1!important;transform:none!important;transition:none!important}}
