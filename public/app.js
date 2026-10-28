@@ -33,7 +33,7 @@ document.querySelectorAll('[data-contact]').forEach(link=>link.addEventListener(
 
 // Reveal hero overlays as they enter view; parallax stays independent of entrance motion.
 const heroVisual=document.querySelector('.hero-visual');
-const heroFloats=[...document.querySelectorAll('.photo-label,.hero-note')];
+const heroFloats=[...document.querySelectorAll('.photo-label')];
 const motionPreference=matchMedia('(prefers-reduced-motion: reduce)');
 let heroFrame=0;
 let heroObserver;
@@ -43,8 +43,8 @@ function updateHeroParallax(){
  const rect=heroVisual.getBoundingClientRect();
  const travel=Math.max(-400,Math.min(800,scrollY));
  if(rect.bottom<0||rect.top>innerHeight)return;
- heroFloats.forEach((element,index)=>{
-  const offset=Math.max(-26.4,Math.min(26.4,travel*(index===0?.0495:-.0385)));
+ heroFloats.forEach(element=>{
+  const offset=Math.max(-26.4,Math.min(26.4,travel*.0495));
   element.style.setProperty('--parallax-y',offset.toFixed(2)+'px');
  });
 }
