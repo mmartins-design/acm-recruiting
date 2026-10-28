@@ -44,7 +44,7 @@ function updateHeroParallax(){
  const travel=Math.max(-400,Math.min(800,scrollY));
  if(rect.bottom<0||rect.top>innerHeight)return;
  heroFloats.forEach((element,index)=>{
-  const offset=Math.max(-24,Math.min(24,travel*(index===0?.045:-.035)));
+  const offset=Math.max(-26.4,Math.min(26.4,travel*(index===0?.0495:-.0385)));
   element.style.setProperty('--parallax-y',offset.toFixed(2)+'px');
  });
 }
