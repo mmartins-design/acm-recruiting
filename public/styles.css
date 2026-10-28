@@ -33,3 +33,10 @@
 .advantage-card.card-reveal-visible{opacity:1;transform:translateY(0)}
 @media(max-width:600px){.advantage-card.card-reveal{transition-delay:0ms}}
 @media(prefers-reduced-motion:reduce){.advantage-card.card-reveal{opacity:1!important;transform:none!important;transition:none!important}}
+
+/* Section 3 workflow: slide and fade in from the right on scroll. */
+.platform-section{overflow-x:clip}
+.workflow.workflow-reveal{transition:opacity .85s ease,transform .85s cubic-bezier(.22,1,.36,1)}
+.workflow.workflow-reveal-pending{opacity:0;transform:translateX(48px)}
+.workflow.workflow-reveal-visible{opacity:1;transform:translateX(0)}
+@media(prefers-reduced-motion:reduce){.workflow.workflow-reveal{opacity:1!important;transform:none!important;transition:none!important}}
