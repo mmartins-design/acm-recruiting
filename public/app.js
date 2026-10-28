@@ -120,3 +120,27 @@ function configureWorkflowMotion(){
 }
 configureWorkflowMotion();
 motionPreference.addEventListener('change',configureWorkflowMotion);
+
+// Section 4 support box enters left; numbered items enter right in sequence.
+const supportElements=[...document.querySelectorAll('#support .support-statement,#support .support-list article')];
+let supportObserver;
+function configureSupportMotion(){
+ supportObserver?.disconnect();
+ supportElements.forEach(element=>element.classList.remove('support-reveal','support-reveal-pending','support-reveal-visible'));
+ if(motionPreference.matches||!('IntersectionObserver' in window))return;
+ supportObserver=new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+   if(!entry.isIntersecting)return;
+   entry.target.classList.remove('support-reveal-pending');
+   entry.target.classList.add('support-reveal-visible');
+   supportObserver.unobserve(entry.target);
+  });
+ },{threshold:.15,rootMargin:'0px 0px -24px 0px'});
+ supportElements.forEach((element,index)=>{
+  element.style.setProperty('--support-delay',Math.max(0,index-1)*120+'ms');
+  element.classList.add('support-reveal','support-reveal-pending');
+  supportObserver.observe(element);
+ });
+}
+configureSupportMotion();
+motionPreference.addEventListener('change',configureSupportMotion);
