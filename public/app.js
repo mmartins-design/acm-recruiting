@@ -30,3 +30,49 @@ const params=new URLSearchParams(location.search);const campaign=Object.fromEntr
 document.querySelectorAll('[data-contact]').forEach(link=>link.addEventListener('click',()=>{
  window.dispatchEvent(new CustomEvent('acm:contact',{detail:{method:link.dataset.contact,...campaign}}));
 }));
+
+// Reveal hero overlays as they enter view; parallax stays independent of entrance motion.
+const heroVisual=document.querySelector('.hero-visual');
+const heroFloats=[...document.querySelectorAll('.photo-label,.hero-note')];
+const motionPreference=matchMedia('(prefers-reduced-motion: reduce)');
+let heroFrame=0;
+let heroObserver;
+function updateHeroParallax(){
+ heroFrame=0;
+ if(motionPreference.matches)return;
+ const rect=heroVisual.getBoundingClientRect();
+ const travel=Math.max(-400,Math.min(800,scrollY));
+ if(rect.bottom<0||rect.top>innerHeight)return;
+ heroFloats.forEach((element,index)=>{
+  const offset=Math.max(-24,Math.min(24,travel*(index===0?.045:-.035)));
+  element.style.setProperty('--parallax-y',offset.toFixed(2)+'px');
+ });
+}
+function queueHeroParallax(){
+ if(!heroFrame&&!motionPreference.matches)heroFrame=requestAnimationFrame(updateHeroParallax);
+}
+function configureHeroMotion(){
+ heroObserver?.disconnect();
+ heroFloats.forEach(element=>{
+  element.classList.remove('motion-pending','motion-entered');
+  element.style.removeProperty('--parallax-y');
+ });
+ if(motionPreference.matches)return;
+ heroFloats.forEach(element=>element.classList.add('hero-float','motion-pending'));
+ heroObserver=new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+   if(!entry.isIntersecting)return;
+   entry.target.classList.remove('motion-pending');
+   entry.target.classList.add('motion-entered');
+   heroObserver.unobserve(entry.target);
+  });
+ },{threshold:.15});
+ heroFloats.forEach(element=>heroObserver.observe(element));
+ queueHeroParallax();
+}
+if(heroVisual&&heroFloats.length){
+ configureHeroMotion();
+ addEventListener('scroll',queueHeroParallax,{passive:true});
+ addEventListener('resize',queueHeroParallax,{passive:true});
+ motionPreference.addEventListener('change',configureHeroMotion);
+}
