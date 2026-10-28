@@ -144,3 +144,40 @@ function configureSupportMotion(){
 }
 configureSupportMotion();
 motionPreference.addEventListener('change',configureSupportMotion);
+
+// Sections 5–8 and 11: consistent, one-time scroll entrances.
+const remainingRevealGroups=[
+ {selector:'#stories .story-card',x:0,y:36,stagger:100},
+ {selector:'#models .model-grid article',x:40,y:0,opposed:true,stagger:0},
+ {selector:'#growth .resource-list details',x:40,y:0,stagger:120},
+ {selector:'#transition .transition-grid article',x:0,y:36,stagger:100},
+ {selector:'#connect .contact-card',x:40,y:0,stagger:0}
+];
+const remainingReveals=remainingRevealGroups.flatMap(group=>
+ [...document.querySelectorAll(group.selector)].map((element,index)=>({
+  element,x:group.opposed&&index===0?-group.x:group.x,y:group.y,delay:index*group.stagger
+ }))
+);
+let remainingRevealObserver;
+function configureRemainingReveals(){
+ remainingRevealObserver?.disconnect();
+ remainingReveals.forEach(({element})=>element.classList.remove('scroll-reveal','scroll-reveal-pending','scroll-reveal-visible'));
+ if(motionPreference.matches||!('IntersectionObserver' in window))return;
+ remainingRevealObserver=new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+   if(!entry.isIntersecting)return;
+   entry.target.classList.remove('scroll-reveal-pending');
+   entry.target.classList.add('scroll-reveal-visible');
+   remainingRevealObserver.unobserve(entry.target);
+  });
+ },{threshold:.12,rootMargin:'0px 0px -24px 0px'});
+ remainingReveals.forEach(({element,x,y,delay})=>{
+  element.style.setProperty('--reveal-x',x+'px');
+  element.style.setProperty('--reveal-y',y+'px');
+  element.style.setProperty('--reveal-delay',delay+'ms');
+  element.classList.add('scroll-reveal','scroll-reveal-pending');
+  remainingRevealObserver.observe(element);
+ });
+}
+configureRemainingReveals();
+motionPreference.addEventListener('change',configureRemainingReveals);
