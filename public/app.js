@@ -220,3 +220,23 @@ function configureRemainingReveals(){
 }
 configureRemainingReveals();
 motionPreference.addEventListener('change',configureRemainingReveals);
+
+// Play the footprint film only while it is visible; respect reduced motion.
+const footprintVideo=document.querySelector('.footprint-video');
+const footprintToggle=document.querySelector('.footprint-toggle');
+let footprintVisible=false,footprintPaused=motionPreference.matches;
+function syncFootprintVideo(){
+ const shouldPlay=footprintVisible&&!footprintPaused&&!document.hidden;
+ if(shouldPlay)footprintVideo.play().catch(()=>{});else footprintVideo.pause();
+ footprintToggle.setAttribute('aria-label',footprintPaused?'Play map animation':'Pause map animation');
+ footprintToggle.innerHTML=footprintPaused?'Play animation <span aria-hidden="true">▶</span>':'Pause animation <span aria-hidden="true">Ⅱ</span>';
+}
+if(footprintVideo){
+ footprintVideo.muted=true;
+ footprintVideo.autoplay=!motionPreference.matches;
+ new IntersectionObserver(entries=>{footprintVisible=entries[0].isIntersecting;syncFootprintVideo();},{threshold:.1}).observe(footprintVideo);
+ footprintToggle.addEventListener('click',()=>{footprintPaused=!footprintPaused;syncFootprintVideo();});
+ motionPreference.addEventListener('change',()=>{footprintPaused=motionPreference.matches;syncFootprintVideo();});
+ document.addEventListener('visibilitychange',syncFootprintVideo);
+ syncFootprintVideo();
+}
