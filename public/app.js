@@ -7,11 +7,50 @@ menu.addEventListener('click', () => {
 navigation.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{menu.setAttribute('aria-expanded','false');menu.setAttribute('aria-label','Open navigation');navigation.classList.remove('open');}));
 document.addEventListener('keydown',event=>{if(event.key==='Escape'){navigation.classList.remove('open');menu.setAttribute('aria-expanded','false');menu.setAttribute('aria-label','Open navigation');}});
 const cards=[...document.querySelectorAll('.story-card')];
+const storyTrack=document.querySelector('#story-track');
+const storyPrev=document.querySelector('#story-prev'),storyNext=document.querySelector('#story-next');
+const storyStatus=document.querySelector('#story-status');
+let storyScrollTimer;
+function visibleStories(){return cards.filter(card=>!card.hidden);}
+function storyLayout(){
+ const visible=visibleStories();
+ const gap=parseFloat(getComputedStyle(storyTrack).columnGap)||0;
+ const step=(visible[0]?.getBoundingClientRect().width||storyTrack.clientWidth)+gap;
+ const count=Math.max(1,Math.round((storyTrack.clientWidth+gap)/step));
+ const index=Math.min(Math.max(0,visible.length-count),Math.max(0,Math.round(storyTrack.scrollLeft/step)));
+ return {visible,step,count,index};
+}
+function updateStoryNavigation(){
+ const {visible,count,index}=storyLayout();
+ const maxScroll=storyTrack.scrollWidth-storyTrack.clientWidth;
+ storyPrev.setAttribute('aria-disabled',String(storyTrack.scrollLeft<=2));
+ storyNext.setAttribute('aria-disabled',String(storyTrack.scrollLeft>=maxScroll-2));
+ document.querySelector('.story-arrows').hidden=visible.length<=count;
+ storyStatus.textContent=visible.length?`Showing ${index+1}–${Math.min(index+count,visible.length)} of ${visible.length} ${visible.length===1?'story':'stories'}`:'No stories in this category';
+}
+function moveStories(direction){
+ const {visible,step,count,index}=storyLayout();
+ const next=Math.max(0,Math.min(visible.length-count,index+direction));
+ storyTrack.scrollTo({left:next*step,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+}
+storyPrev.addEventListener('click',()=>moveStories(-1));
+storyNext.addEventListener('click',()=>moveStories(1));
+storyTrack.addEventListener('keydown',event=>{
+ if(event.key==='ArrowRight'||event.key==='ArrowLeft'){
+  event.preventDefault();moveStories(event.key==='ArrowRight'?1:-1);
+ }
+});
+storyTrack.addEventListener('scroll',()=>{
+ clearTimeout(storyScrollTimer);storyScrollTimer=setTimeout(updateStoryNavigation,120);
+},{passive:true});
+new ResizeObserver(updateStoryNavigation).observe(storyTrack);
 document.querySelectorAll('[data-filter]').forEach(button=>button.addEventListener('click',()=>{
  document.querySelectorAll('[data-filter]').forEach(b=>{b.classList.toggle('active',b===button);b.setAttribute('aria-pressed',String(b===button));});
- let visible=0;cards.forEach(card=>{card.hidden=button.dataset.filter!=='all'&&card.dataset.category!==button.dataset.filter;if(!card.hidden)visible++;});
- document.querySelector('#story-status').textContent=`Showing ${visible} ${visible===1?'story':'stories'}`;
+ cards.forEach(card=>{card.hidden=button.dataset.filter!=='all'&&card.dataset.category!==button.dataset.filter;});
+ storyTrack.scrollTo({left:0,behavior:'instant'});
+ updateStoryNavigation();
 }));
+updateStoryNavigation();
 const dialog=document.querySelector('#video-dialog'),video=document.querySelector('#story-video');let videoTrigger;
 document.querySelectorAll('[data-video]').forEach(button=>button.addEventListener('click',()=>{
  videoTrigger=button;document.querySelector('#video-title').textContent=button.dataset.title;document.querySelector('#video-person').textContent=button.dataset.name;
